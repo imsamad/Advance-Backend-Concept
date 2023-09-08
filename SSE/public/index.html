@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      <title>Chat with SSE and WebSocket</title>
+   </head>
+   <body>
+      <h1>Chat with SSE and WebSocket</h1>
+      <div id="chat-box"></div>
+      <input type="text" id="message" placeholder="Type your message" />
+      <button onclick="sendMessage()">Send</button>
+
+      <script>
+         const chatBox = document.getElementById("chat-box");
+         const messageInput = document.getElementById("message");
+
+         // Create an EventSource for receiving messages from the server via SSE
+         const eventSource = new EventSource("/sse");
+
+         eventSource.onmessage = (event) => {
+            const message = event.data;
+            appendMessage(message);
+         };
+
+         // Create a WebSocket connection to the server
+         const socket = new WebSocket(
+            `ws://${window.location.hostname}:${window.location.port}`
+         );
+
+         socket.onmessage = (event) => {
+            const message = event.data;
+            appendMessage(message);
+         };
+
+         function sendMessage() {
+            const message = messageInput.value;
+            if (message) {
+               // Send the message to the server via WebSocket
+               socket.send(message);
+               messageInput.value = "";
+            }
+         }
+
+         function appendMessage(message) {
+            const messageDiv = document.createElement("div");
+            messageDiv.textContent = message;
+            chatBox.appendChild(messageDiv);
+         }
+      </script>
+   </body>
+</html>
